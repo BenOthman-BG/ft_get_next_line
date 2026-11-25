@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-void	*ft_memcpy(void *dest, const void *src, size_t n))
+void	*ft_memcpy(void *dest, const void *src, size_t n)
 {
 	char *p_src;
 	char *p_dest;
@@ -27,17 +27,29 @@ void	*ft_memcpy(void *dest, const void *src, size_t n))
 	return (dest);
 }
 
-int	ft_find_line(char *s)
+int	ft_find_line(char *s, int len)
 {
-	while (*s)
+	int	i;
+
+	i = 0;
+	while (i < len)
 	{
-		if (*s == '\n')
-			return (1);
-		s++;
+		if (s[i] == '\n')
+			return (i);
+		i++;
 	}
-	return (0);
+	return (-1);
 }
 
-char *ft_realloc(char *acc, int acc_len, int data_len)
+char *ft_realloc(char *acc, int *acc_len, int data_len, char *buffer)
 {
+	char *new_space;
+
+	new_space = malloc((*acc_len * *acc_len) * sizeof(char));
+	if (new_space == NULL)
+		return (NULL);
+	*acc_len = *acc_len * *acc_len;
+	ft_memcpy(new_space, acc, data_len);
+	free(acc);
+	return (new_space);
 }
