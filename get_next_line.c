@@ -29,9 +29,21 @@ static	*char ft_init_acc(char **left_over, int	*data_len, int *acc_len)
 	acc = malloc((BUFFER_SIZE + 1) * sizeof(char));
 	if (acc == NULL)
 		return (NULL);
-	acc[0] = '\0';//i dont know why ?
+//	acc[0] = '\0';// ?
 	*data_len = 0;
 	*acc_len = BUFFER_SIZE + 1;
+	return (acc);
+}
+
+static *char ft_extract_line()
+{
+	if (len == 0)
+		return (free(acc, buffer), NULL);
+	if (ft_find_line())
+	{
+		save_in left over;
+		return (ft_substr());
+	}
 	return (acc);
 }
 
@@ -62,6 +74,8 @@ char *get_next_line(int fd)
 				return (free(buffer, acc), NULL);
 		}
 		ft_memcpy(acc+len, buffer, r);
+		if (ft_find_line())
+			retur`n (extract_acc());
 		r = read(fd, buffer, BUFFER_SIZE);
 	}
 	if (r < 0)
