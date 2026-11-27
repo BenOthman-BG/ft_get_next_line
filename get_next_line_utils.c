@@ -6,7 +6,7 @@
 /*   By: obenyahy <obenyahy@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/25 18:25:13 by obenyahy          #+#    #+#             */
-/*   Updated: 2026/11/25 19:57:05 by obenyahy         ###   ########.fr       */
+/*   Updated: 2026/11/27 09:44:39 by obenyahy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ void	*ft_memcpy(void *dest, const void *src, size_t n)
 	return (dest);
 }
 
-size_t	ft_find_line(const char *s, size_t len)
+ssize_t	ft_find_line(const char *s, size_t len)
 {
 	size_t	i;
 
@@ -47,7 +47,7 @@ size_t	ft_find_line(const char *s, size_t len)
 	while (i < len)
 	{
 		if (s[i] == '\n')
-			return ((size_t)i);
+			return ((ssize_t)i);
 		i++;
 	}
 	return (-1);
@@ -65,7 +65,8 @@ int	ft_realloc(char **acc, size_t *acc_len, size_t data_len, size_t need)
 		ft_cleanup(acc, NULL);
 		return (0);
 	}
-	ft_memcpy(new_space, *acc, data_len);
+	if (data_len > 0)
+		ft_memcpy(new_space, *acc, data_len);
 	free(*acc);
 	*acc = new_space;
 	return (1);
