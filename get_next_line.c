@@ -1,65 +1,82 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: obenyahy <obenyahy@student.1337.ma>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/11/26 14:44:35 by obenyahy          #+#    #+#             */
+/*   Updated: 2026/11/27 09:39:26 by obenyahy         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "get_next_line.h"
 
-static *char ft_init_acc(char **left_over_p, int *data_len, int *acc_len)
+static char	*ft_init_acc(char **left_over_p, size_t *data_len, size_t *acc_len)
 {
 	char	*acc;
 
-	if (*left_over != NULL)
+	if (*left_over_p != NULL)
 	{
-		acc = *left_over;
-		*left_over = NULL;
-		*data_len = ft_strlen(*left_over);
+		acc = *left_over_p;
+		*left_over_p = NULL;
+		*data_len = ft_strlen(acc);
 		*acc_len = *data_len + 1;
 		return (acc);
 	}
-	acc = malloc((BUFFER_SIZE + 1) * sizeof(char));
+	*acc_len = 64;
+	acc = malloc (64 *sizeof(char));
 	if (acc == NULL)
 		return (NULL);
 	acc[0] = '\0';
 	*data_len = 0;
-	*acc_len = BUFFER_SIZE + 1;
 	return (acc);
 }
 
-static char *ft_extract_and_save(char *acc, int len, int find_line, char **left_over_p)
+static char	*ft_extract_and_save(char *acc, size_t len,
+				ssize_t find_line, char **left_over_p)
 {
 	char	*line;
-	int		rest;
+	size_t	rest;
 
 	if (find_line < 0)
 		return (acc);
 	line = malloc(find_line + 2);
-	left = ft_find_line(acc, len);
 	if (line == NULL)
-		return (free(acc), NULL);
-	ft_memcpy(line, acc, find_line + 1) line[find_line + 1] = '\0';
+		return (ft_cleanup(&acc, NULL));
+	ft_memcpy(line, acc, find_line + 1);
+	line[find_line + 1] = '\0';
 	rest = len - (find_line + 1);
 	if (rest > 0)
 	{
-		*left_over = malloc(rest + 1);
-		if (*left_over == NULL)
-			return (free(acc, line), NULL);
-		ft_memcpy(*left_over, acc + find_len, rest);
-		left_over[0][rest] = '\0';
+		*left_over_p = malloc(rest + 1);
+		if (*left_over_p == NULL)
+			return (ft_cleanup(&acc, &line));
+		ft_memcpy(*left_over_p, acc + find_line + 1, rest);
+		(*left_over_p)[rest] = '\0';
 	}
 	free(acc);
 	return (line);
 }
 
-static int	init_read(char *acc, char **buffer, int *find_len)
+static int	init_read(char **acc, char **buffer, ssize_t *find_len)
 {
 	*find_len = -1;
-	*buffer = malloc(BUFFER_SIZE + 1);
+	*buffer = malloc((size_t)BUFFER_SIZE + 1);
 	if (*buffer == NULL)
-		return (free(acc), 0);
+	{
+		ft_cleanup(acc, NULL);
+		return (0);
+	}
 	return (1);
 }
 
-int	ft_read_loop(char **acc, int *acc_len, int *data_len, int fd)
+static ssize_t	ft_read_loop(char **acc, size_t *acc_len,
+					size_t *data_len, int fd)
 {
 	char	*buffer;
-	int		r;
-	int		find_len;
+	ssize_t	r;
+	ssize_t	find_len;
 
 	if (init_read(acc, &buffer, &find_len) == 0)
 		return (-1);
@@ -68,27 +85,29 @@ int	ft_read_loop(char **acc, int *acc_len, int *data_len, int fd)
 		r = read(fd, buffer, BUFFER_SIZE);
 		if (r <= 0)
 			break ;
-		if ((*data_len + r + 1) > *acc_len && !ft_realloc(&acc, &acc_len, data_len, data_len + r + 1))
-			return (free(*acc, buffer), NULL);
-		ft_memcpy(*acc + *len, buffer, r);
+		if ((*data_len + r + 1) > *acc_len
+			&& !ft_realloc(acc, acc_len, *data_len, *data_len + r + 1))
+			return (ft_cleanup(&buffer, NULL), 0);
+		ft_memcpy(*acc + *data_len, buffer, r);
 		find_len = ft_find_line(buffer, r);
-		*len += r;
+		*data_len += r;
 	}
+	free(buffer);
 	if (r < 0)
-		return (free(*acc, buffer), 0);
-	acc[0][*len] = '\0';
+		return (ft_cleanup(acc, NULL), 0);
+	(*acc)[*data_len] = '\0';
 	if (find_len >= 0)
-		return (free(buffer), find_len + *len - r);
-	return (free(buffer), -1);
+		return (find_len + *data_len - r);
+	return (-1);
 }
 
 char	*get_next_line(int fd)
 {
 	static char	*left_over;
 	char		*acc;
-	int			data_len;
-	int			acc_len;
-	int			find_len;
+	size_t		data_len;
+	size_t		acc_len;
+	ssize_t		find_len;
 
 	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
@@ -101,6 +120,6 @@ char	*get_next_line(int fd)
 	if (acc == NULL)
 		return (NULL);
 	if (data_len == 0)
-		return (free(acc), NULL);
-	return (ft_extract_and_save(acc, len, find_len, &left_over));
+		return (ft_cleanup(&acc, NULL));
+	return (ft_extract_and_save(acc, data_len, find_len, &left_over));
 }
